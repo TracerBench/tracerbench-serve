@@ -1,0 +1,8 @@
+[workspace]
+members = [
+  "tracerbench-serve",
+  "request-key",
+  "recorded-response-set",
+  "recorded-response-server",
+  "socks-proxy"
+]

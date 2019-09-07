@@ -1,0 +1,11 @@
+[package]
+name = "tracerbench-socks-proxy"
+version = "0.1.0"
+authors = ["Kris Selden <kris.selden@gmail.com>"]
+license = "BSD-2-Clause"
+edition = "2018"
+
+[dependencies]
+log = "0.4"
+tokio = "=0.2.0-alpha.6"
+
