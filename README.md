@@ -2,64 +2,94 @@
 
 Serves recorded response sets for benchmarking.
 
+The goal is to serve recorded responses with low variance in memory and CPU cost.
+
+## Building
+
+Follow the instructions at https://rustup.rs.
+
+As of this writing, tracerbench-serve requires the latest Rust beta.
+
+```sh
+rustup toolchain install beta
+```
+
+```sh
+cargo build --release
+```
+
 ## recorded response set
 
 Serde deserialize format:
 
-Recorded response sets
-Seq (len 6)
-  Body table
-  Header name table
-  Header value table
-  Headers table
-  Response table
-  Recorded response set table
+### Recorded response sets:
 
-Body table:
-Seq of
-  Bytes
+- Seq length 6
+  - Body table
+  - Header name table
+  - Header value table
+  - Headers table
+  - Response table
+  - Recorded response set table
 
-Header name table:
-Seq of
-  String
+### Body table:
 
-Header value table:
-Seq of
-  String
+- Seq of
+  - Bytes
 
-Headers table
-Seq of
-  Seq of
-    (
-      usize, // name table index
-      usize, // value table index
-    )
+### Header name table:
 
-Response table
-Seq of
-  (
-    u16, // status
-    usize, // headers table index
-    Option<usize>, // body table index
-  )
+- Seq of
+  - String
 
-Response set table
-Seq of
-  Map
-    socksPort: u16,
-    name: String,
-    entryKey: String,
-    requestKeyProgram: Request key,
-    requestKeyMap:
-      Map String: usize // key to response_index
+### Header value table:
 
-Request key
-Seq
-  literals
-  Bytes
+- Seq of
+  - String
 
-literals
-  Map
-    type: String,
-    content: Value
+### Headers table
 
+- Seq of
+  - Seq of
+    - Seq length 2
+      - usize ( name table index )
+      - usize ( value table index )
+
+### Response table
+
+- Seq of
+  - Seq length 3
+    - u16 ( status )
+    - usize ( headers table index )
+    - Option<usize> ( body table index )
+
+### Response set table
+
+- Seq of
+  - Map
+    - socksPort:
+      - u16
+    - name:
+      - String
+    - entryKey:
+      - String
+    - requestKeyProgram:
+      - Request key
+    - requestKeyMap:
+      - Map
+        - String: ( request key )
+          - usize ( response_index )
+
+### Request key
+
+- Seq length 2
+  program literals
+  Bytes (program bytecode)
+
+#### program literals
+
+- Map
+  - type:
+    - String
+  - content:
+    - Value
