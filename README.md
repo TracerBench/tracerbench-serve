@@ -1,8 +1,8 @@
 # tracerbench-serve
+Serves recorded response sets for benchmarking. The goal is to serve recorded responses with low variance in memory and CPU cost.
 
-Serves recorded response sets for benchmarking.
-
-The goal is to serve recorded responses with low variance in memory and CPU cost.
+## For Guide, API Reference & Contributing Info
+https://www.tracerbench.com/
 
 ## Building
 
