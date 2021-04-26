@@ -56,7 +56,7 @@ impl RecordedResponseSet {
   }
 
   pub fn key_for(&self, method: &Method, uri: &Uri) -> String {
-    let authority = match uri.authority_part() {
+    let authority = match uri.authority() {
       Some(authority) => authority.as_str(),
       None => "*", // should never happen in h2
     };
@@ -77,7 +77,7 @@ impl RecordedResponseSet {
     self.response_map.get(key)
   }
 
-  fn from_raw<'a>(raw_set: RawResponseSet<'a>, response_table: &ResponseTable) -> Self {
+  fn from_raw(raw_set: RawResponseSet<'_>, response_table: &ResponseTable) -> Self {
     let raw_map = raw_set.request_key_map;
     let mut response_map: HashMap<String, RecordedResponse> = HashMap::with_capacity(raw_map.len());
 

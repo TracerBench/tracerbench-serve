@@ -11,5 +11,4 @@ serde = "1"
 serde_derive = "1"
 
 [dev-dependencies]
-serde_cbor = "0.10"
-
+serde_cbor = "0.11"

@@ -55,7 +55,7 @@ where
 pub(super) fn deserialize_bytes_seq<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
 where
   D: Deserializer<'de>,
-  T: From<&'de [u8]>,
+  T: From<Vec<u8>>,
 {
   deserialize_seq_into_vec(deserializer)
 }

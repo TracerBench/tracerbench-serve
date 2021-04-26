@@ -43,7 +43,7 @@ impl Server {
   }
 
   pub async fn start(&self) -> Result<(), io::Error> {
-    let mut listener = TcpListener::bind(self.addr()).await?;
+    let listener = TcpListener::bind(self.addr()).await?;
 
     println!(
       "response set {} socks proxy server listening at {}",
