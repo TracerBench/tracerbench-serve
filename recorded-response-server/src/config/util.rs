@@ -9,7 +9,7 @@ use std::sync::Arc;
 use tokio_rustls::rustls::internal::pemfile;
 use tokio_rustls::rustls::{Certificate, NoClientAuth, PrivateKey, ServerConfig};
 use tracerbench_recorded_response_set::RecordedResponseSets;
-use webpki::trust_anchor_util::cert_der_as_trust_anchor;
+use webpki::TrustAnchor;
 
 static ALPN_H2: &[u8] = b"h2";
 
@@ -61,7 +61,7 @@ pub(super) fn read_response_set_cbor(path: &PathBuf) -> Result<RecordedResponseS
 /// The base64 encoded SHA256 digest of subject public key info.
 /// This is needed for the chrome command line switch ignore-certificate-errors-spki-list
 pub(super) fn spki_digest(cert_der: &[u8]) -> Result<String, Error> {
-  let trust_anchor = cert_der_as_trust_anchor(cert_der).map_err(invalid_data)?;
+  let trust_anchor = TrustAnchor::try_from_cert_der(cert_der).map_err(invalid_data)?;
   // unfortunately the only public api exposed to get the subjectPublicKeyInfo
   // is this one, and it is only the V part of the DER TLV
   // and we need the TL part

@@ -1,17 +1,17 @@
 # tracerbench-serve
+
 Serves recorded response sets for benchmarking. The goal is to serve recorded responses with low variance in memory and CPU cost.
 
 ## For Guide, API Reference & Contributing Info
+
 https://www.tracerbench.com/
 
 ## Building
 
 Follow the instructions at https://rustup.rs.
 
-As of this writing, tracerbench-serve requires the latest Rust beta.
-
 ```sh
-rustup toolchain install beta
+rustup toolchain install stable
 ```
 
 ```sh
