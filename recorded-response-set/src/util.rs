@@ -9,6 +9,7 @@ use std::fmt;
 use std::fmt::Display;
 use std::marker::PhantomData;
 use std::str::FromStr;
+use bytes::Bytes;
 
 pub(super) fn deserialize_str_seq_into_parsed_vec<'de, T, D>(
   deserializer: D,
@@ -52,32 +53,72 @@ where
   deserializer.deserialize_seq(BuilderVisitor::from(FromStrBuilder::new()))
 }
 
-pub(super) fn deserialize_bytes_seq<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+pub(super) fn deserialize_bytes_seq<'de, D>(deserializer: D) -> Result<Vec<Bytes>, D::Error>
 where
   D: Deserializer<'de>,
-  T: From<Vec<u8>>,
 {
-  deserialize_seq_into_vec(deserializer)
+  deserialize_seq_into_vec::<'de, BytesWrapper, D, Bytes, _>(deserializer, |w| w.0)
 }
 
-fn deserialize_seq_into_vec<'de, U, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+struct BytesVisitor;
+
+struct BytesWrapper(Bytes);
+
+impl Into<Bytes> for BytesWrapper {
+  fn into(self) -> Bytes {
+    self.0
+  }
+}
+
+impl<'de> Visitor<'de> for BytesVisitor {
+    type Value = BytesWrapper;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("byte array")
+    }
+
+    fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        Ok(BytesWrapper(Bytes::copy_from_slice(v)))
+    }
+
+    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        Ok(BytesWrapper(v.into()))
+    }
+}
+
+impl<'de> Deserialize<'de> for BytesWrapper {
+    fn deserialize<D>(deserializer: D) -> Result<BytesWrapper, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+      deserializer.deserialize_byte_buf(BytesVisitor)
+    }
+}
+
+fn deserialize_seq_into_vec<'de, U, D, T, F>(deserializer: D, conv: F) -> Result<Vec<T>, D::Error>
 where
   U: Deserialize<'de>,
   D: Deserializer<'de>,
-  T: From<U>,
+  F: Fn(U) -> T
 {
-  struct FromBuilder<T, E>(PhantomData<fn(E) -> T>);
+  struct FromBuilder<T, U, F>(F, PhantomData<fn(U) -> T>);
 
-  impl<T, E> FromBuilder<T, E> {
-    fn new() -> FromBuilder<T, E> {
-      FromBuilder(PhantomData)
+  impl<T, U, F> FromBuilder<T, U, F> where F: Fn(U) -> T {
+    fn new(conv: F) -> FromBuilder<T, U, F> {
+      FromBuilder(conv, PhantomData)
     }
   }
 
-  impl<'de, T, E> SequenceBuilder<'de> for FromBuilder<T, E>
+  impl<'de, T, U, F> SequenceBuilder<'de> for FromBuilder<T, U, F>
   where
-    T: From<E>,
-    E: Deserialize<'de>,
+    U: Deserialize<'de>,
+    F: Fn(U) -> T
   {
     type Output = Vec<T>;
 
@@ -89,14 +130,14 @@ where
     where
       S: SeqAccess<'de>,
     {
-      while let Some(element) = seq.next_element::<E>()? {
-        container.push(element.into());
+      while let Some(element) = seq.next_element::<U>()? {
+        container.push(self.0(element));
       }
       Ok(())
     }
   }
 
-  let builder = FromBuilder::new();
+  let builder = FromBuilder::new(conv);
   deserializer.deserialize_seq(BuilderVisitor::from(builder))
 }
 
