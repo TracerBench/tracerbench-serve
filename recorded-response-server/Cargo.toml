@@ -16,7 +16,7 @@ memmap = "0.7"
 ring = "0.16"
 serde = "1"
 serde_cbor = "0.11"
-tokio = { version = "1.5", features = ["net", "rt"] }
+tokio = { version = "1.8", features = ["net", "rt"] }
 tokio-rustls = "0.22.0"
 tracerbench-recorded-response-set = { path = "../recorded-response-set" }
 tracerbench-socks-proxy = { path = "../socks-proxy" }
