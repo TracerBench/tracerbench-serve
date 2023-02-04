@@ -7,4 +7,4 @@ edition = "2018"
 
 [dependencies]
 log = "0.4"
-tokio = "1.5"
+tokio = "1.16"
